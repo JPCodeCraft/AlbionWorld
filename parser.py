@@ -17,11 +17,19 @@ def parse_clusters(xml_path):
     for cluster_elem in root.findall('./clusters/cluster'):
         if cluster_elem.get('enabled') == 'true':
             cluster = {
+                'imageFile': cluster_elem.get('file').replace('.cluster.xml', '.png'),
                 'id': cluster_elem.get('id'),
                 'displayName': cluster_elem.get('displayname'),
                 'enabled': cluster_elem.get('enabled'),
                 'type': cluster_elem.get('type'),
-                'neighbours': set()  # Use a set to collect unique neighbours
+                'origin': tuple(map(float, cluster_elem.get('origin').split())) if cluster_elem.get('origin') else None,
+                'size': tuple(map(float, cluster_elem.get('size').split())) if cluster_elem.get('size') else None,
+                'worldmapposition': tuple(map(float, cluster_elem.get('worldmapposition').split())) if cluster_elem.get('worldmapposition') else None,
+                'minimapBoundsMin': tuple(map(float, cluster_elem.get('minimapBoundsMin').split())) if cluster_elem.get('minimapBoundsMin') else None,
+                'minimapBoundsMax': tuple(map(float, cluster_elem.get('minimapBoundsMax').split())) if cluster_elem.get('minimapBoundsMax') else None,
+                'neighbours': set(),  # Use a set to collect unique neighbours
+                'exits': [],
+                'portalExits': []
             }
             
             cluster_types.add(cluster['type'])
@@ -30,15 +38,29 @@ def parse_clusters(xml_path):
             exits_elem = cluster_elem.find('exits')
             if exits_elem is not None:
                 for exit_elem in exits_elem.findall('exit'):
-                    target_id = exit_elem.get('targetid').split('@')[-1]
-                    cluster['neighbours'].add(target_id)
+                    target_id = exit_elem.get('targetid')
+                    target_location_id = target_id.split('@')[-1]
+                    cluster['neighbours'].add(target_location_id)
+                    cluster['exits'].append({                        
+                        'id': exit_elem.get('id'),
+                        'targetId': target_id,
+                        'targetLocationId': target_location_id,
+                        'position': tuple(map(float, exit_elem.get('pos').split())),
+                    })
             
             # Process portal exits
             portal_exits_elem = cluster_elem.find('portalexits')
             if portal_exits_elem is not None:
                 for portal_exit_elem in portal_exits_elem.findall('portalexit'):
-                    target_id = portal_exit_elem.get('targetid').split('@')[-1]
-                    cluster['neighbours'].add(target_id)
+                    target_id = portal_exit_elem.get('targetid')
+                    target_location_id = target_id.split('@')[-1]
+                    cluster['neighbours'].add(target_location_id)
+                    cluster['portalExits'].append({                
+                        'id': portal_exit_elem.get('id'),
+                        'targetId': target_id,
+                        'targetLocationId': target_location_id,
+                        'position': tuple(map(float, portal_exit_elem.get('pos').split())),
+                    })
             
             cluster['neighbours'] = list(cluster['neighbours'])  # Convert set back to list
             clusters.append(cluster)
