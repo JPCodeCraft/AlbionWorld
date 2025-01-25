@@ -6,6 +6,42 @@ xml_path = 'world.xml'
 output_path = 'albionLocations.json'
 cluster_types_path = 'clusterTypes.json'
 
+def type_to_pvp_category(type_str):
+    if 'DUNGEON_BLACK' in type_str or 'OPENPVP_BLACK' in type_str or 'PASSAGE_BLACK' in type_str:
+        return 'black'
+    elif 'DUNGEON_RED' in type_str or 'OPENPVP_RED' in type_str or 'PASSAGE_RED' in type_str:
+        return 'red'
+    elif 'DUNGEON_YELLOW' in type_str or 'OPENPVP_YELLOW' in type_str:
+        return 'yellow'
+    elif 'DUNGEON_SAFEAREA' in type_str or 'SAFEAREA' in type_str or 'STARTAREA' in type_str or 'PLAYERCITY' in type_str:
+        return 'blue'
+    else:
+        return 'other'
+    
+def type_to_map_category(type_str):
+    if 'ARENA' in type_str:
+        return 'arena'
+    if 'CORRUPTED_DUNGEON' in type_str:
+        return 'corrupted'
+    if 'DUNGEON' in type_str:
+        return 'dungeon'
+    if 'ISLAND' in type_str:
+        return 'island'
+    if 'EXPEDITION' in type_str:
+        return 'expedition'
+    if 'HIDEOUT' in type_str:
+        return 'hideout'
+    if 'OPENPVP' in type_str or 'SAFEAREA' in type_str or 'STARTAREA' in type_str:
+        return 'openworld'
+    if 'PASSAGE' in type_str:
+        return 'passage'
+    if 'PLAYERCITY' in type_str:
+        return 'city'
+    if 'TUNNEL' in type_str:
+        return 'roads'
+    else:
+        return 'other'
+
 def parse_clusters(xml_path):
     tree = ET.parse(xml_path)
     root = tree.getroot()
@@ -22,6 +58,8 @@ def parse_clusters(xml_path):
                 'displayName': cluster_elem.get('displayname'),
                 'enabled': cluster_elem.get('enabled'),
                 'type': cluster_elem.get('type'),
+                'pvpCategory': type_to_pvp_category(cluster_elem.get('type')),
+                'mapCategory': type_to_map_category(cluster_elem.get('type')),
                 'origin': tuple(map(float, cluster_elem.get('origin').split())) if cluster_elem.get('origin') else None,
                 'size': tuple(map(float, cluster_elem.get('size').split())) if cluster_elem.get('size') else None,
                 'worldmapposition': tuple(map(float, cluster_elem.get('worldmapposition').split())) if cluster_elem.get('worldmapposition') else None,
@@ -39,8 +77,8 @@ def parse_clusters(xml_path):
             exits_elem = cluster_elem.find('exits')
             if exits_elem is not None:
                 for exit_elem in exits_elem.findall('exit'):
-                    target_id = exit_elem.get('targetid')
-                    target_location_id = target_id.split('@')[-1]
+                    target_id = exit_elem.get('targetid').split('@')[0]
+                    target_location_id = exit_elem.get('targetid').split('@')[-1]
                     cluster['neighbours'].add(target_location_id)
                     cluster['exits'].append({                        
                         'id': exit_elem.get('id'),
@@ -61,6 +99,7 @@ def parse_clusters(xml_path):
                         'targetId': target_id,
                         'targetLocationId': target_location_id,
                         'position': tuple(map(float, portal_exit_elem.get('pos').split())),
+                        'kind': portal_exit_elem.get('kind'),
                     })
                     
             # Process portal entrances
@@ -70,6 +109,7 @@ def parse_clusters(xml_path):
                     cluster['portalEntrances'].append({                
                         'id': portal_entrance_elem.get('id'),
                         'position': tuple(map(float, portal_entrance_elem.get('pos').split())),
+                        'kind': portal_entrance_elem.get('kind'),
                     })
             
             cluster['neighbours'] = list(cluster['neighbours'])  # Convert set back to list
