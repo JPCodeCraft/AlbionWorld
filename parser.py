@@ -29,7 +29,8 @@ def parse_clusters(xml_path):
                 'minimapBoundsMax': tuple(map(float, cluster_elem.get('minimapBoundsMax').split())) if cluster_elem.get('minimapBoundsMax') else None,
                 'neighbours': set(),  # Use a set to collect unique neighbours
                 'exits': [],
-                'portalExits': []
+                'portalExits': [],
+                'portalEntrances': [],
             }
             
             cluster_types.add(cluster['type'])
@@ -61,6 +62,15 @@ def parse_clusters(xml_path):
                         'targetLocationId': target_location_id,
                         'position': tuple(map(float, portal_exit_elem.get('pos').split())),
                     })
+                    
+            # Process portal entrances
+            portal_entrances_elem = cluster_elem.find('portalentrances')
+            if portal_entrances_elem is not None:
+                for portal_entrance_elem in portal_entrances_elem.findall('portalentrance'):
+                    cluster['portalEntrances'].append({                
+                        'id': portal_entrance_elem.get('id'),
+                        'position': tuple(map(float, portal_entrance_elem.get('pos').split())),
+                    })
             
             cluster['neighbours'] = list(cluster['neighbours'])  # Convert set back to list
             clusters.append(cluster)
@@ -70,6 +80,31 @@ def parse_clusters(xml_path):
 if __name__ == '__main__':
     xml_file = sys.argv[1] if len(sys.argv) > 1 else xml_path
     clusters_data, cluster_types = parse_clusters(xml_file)
+    
+    # Create a map from cluster ID to cluster data for quick lookup
+    cluster_map = {cluster['id']: cluster for cluster in clusters_data}
+    
+    # Process portal exits to update corresponding portal entrances and neighbours
+    for source_cluster in clusters_data:
+        for portal_exit in source_cluster['portalExits']:
+            target_full = portal_exit['targetId']
+            # Split into entrance_id and target_cluster_id
+            if '@' not in target_full:
+                continue  # Skip invalid entries
+            entrance_id, target_cluster_id = target_full.split('@', 1)
+            target_cluster = cluster_map.get(target_cluster_id)
+            if not target_cluster:
+                continue  # Skip if target cluster not found
+            # Find the corresponding portal entrance in target cluster
+            for entrance in target_cluster['portalEntrances']:
+                if entrance['id'] == entrance_id:
+                    # Add targetId and targetLocationId to the entrance
+                    entrance['targetId'] = f"{portal_exit['id']}@{source_cluster['id']}"
+                    entrance['targetLocationId'] = source_cluster['id']
+                    # Add source cluster to target's neighbours if not present
+                    if source_cluster['id'] not in target_cluster['neighbours']:
+                        target_cluster['neighbours'].append(source_cluster['id'])
+                    break  # Exit loop once found
     
     # Sort cluster_types by name
     cluster_types.sort()

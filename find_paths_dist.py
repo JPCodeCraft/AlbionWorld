@@ -78,8 +78,8 @@ def find_shortest_path(clusters, start, end, avoid_type):
         if not current_cluster:
             continue
 
-        # Process all exits and portalExits
-        for exit in current_cluster['exits'] + current_cluster.get('portalExits', []):
+        # Process all exits and portalExits and portalEntrances
+        for exit in current_cluster['exits'] + current_cluster.get('portalExits', []) + current_cluster.get('portalEntrances', []):
             exit_pos = tuple(exit['position'])
             
             # Determine target information
