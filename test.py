@@ -6,7 +6,7 @@ import os
 from scipy.ndimage import rotate
 
 albionLocationsJsonFile = 'albionLocations.json'
-clusterId = '2348'  # Replace with the desired cluster ID
+clusterId = '0301'  # Replace with the desired cluster ID
 
 # Load the JSON data
 with open(albionLocationsJsonFile, 'r') as f:

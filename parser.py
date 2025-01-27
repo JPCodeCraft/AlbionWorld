@@ -13,7 +13,7 @@ def type_to_pvp_category(type_str):
         return 'red'
     elif 'DUNGEON_YELLOW' in type_str or 'OPENPVP_YELLOW' in type_str:
         return 'yellow'
-    elif 'DUNGEON_SAFEAREA' in type_str or 'SAFEAREA' in type_str or 'STARTAREA' in type_str or 'PLAYERCITY' in type_str:
+    elif 'DUNGEON_SAFEAREA' in type_str or 'SAFEAREA' in type_str or 'STARTAREA' in type_str or 'PLAYERCITY' in type_str or 'STARTINGCITY' in type_str or 'TUTORIAL' in type_str:
         return 'blue'
     else:
         return 'other'
@@ -35,7 +35,7 @@ def type_to_map_category(type_str):
         return 'openworld'
     if 'PASSAGE' in type_str:
         return 'passage'
-    if 'PLAYERCITY' in type_str:
+    if 'PLAYERCITY' in type_str or 'STARTINGCITY' in type_str:
         return 'city'
     if 'TUNNEL' in type_str:
         return 'roads'
