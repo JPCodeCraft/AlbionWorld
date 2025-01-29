@@ -91,8 +91,8 @@ def parse_clusters(xml_path):
             portal_exits_elem = cluster_elem.find('portalexits')
             if portal_exits_elem is not None:
                 for portal_exit_elem in portal_exits_elem.findall('portalexit'):
-                    target_id = portal_exit_elem.get('targetid')
-                    target_location_id = target_id.split('@')[-1]
+                    target_id = portal_exit_elem.get('targetid').split('@')[0]
+                    target_location_id = portal_exit_elem.get('targetid').split('@')[-1]
                     cluster['neighbours'].add(target_location_id)
                     cluster['portalExits'].append({                
                         'id': portal_exit_elem.get('id'),
@@ -127,11 +127,8 @@ if __name__ == '__main__':
     # Process portal exits to update corresponding portal entrances and neighbours
     for source_cluster in clusters_data:
         for portal_exit in source_cluster['portalExits']:
-            target_full = portal_exit['targetId']
-            # Split into entrance_id and target_cluster_id
-            if '@' not in target_full:
-                continue  # Skip invalid entries
-            entrance_id, target_cluster_id = target_full.split('@', 1)
+            target_cluster_id = portal_exit['targetLocationId']
+            entrance_id = portal_exit['targetId']
             target_cluster = cluster_map.get(target_cluster_id)
             if not target_cluster:
                 continue  # Skip if target cluster not found
@@ -139,7 +136,7 @@ if __name__ == '__main__':
             for entrance in target_cluster['portalEntrances']:
                 if entrance['id'] == entrance_id:
                     # Add targetId and targetLocationId to the entrance
-                    entrance['targetId'] = f"{portal_exit['id']}@{source_cluster['id']}"
+                    entrance['targetId'] = portal_exit['id']
                     entrance['targetLocationId'] = source_cluster['id']
                     # Add source cluster to target's neighbours if not present
                     if source_cluster['id'] not in target_cluster['neighbours']:
