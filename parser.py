@@ -1,3 +1,4 @@
+import re
 import xml.etree.ElementTree as ET
 import json
 import sys
@@ -55,6 +56,8 @@ def parse_clusters(xml_path):
             cluster = {
                 'imageFile': cluster_elem.get('file').replace('.cluster.xml', '.png'),
                 'id': cluster_elem.get('id'),
+                'tier': re.search(r'_T(\d)_', cluster_elem.get('file')).group(1) if re.search(r'_T(\d)_', cluster_elem.get('file')) else None,
+                'quality': re.search(r'_Q(\d).', cluster_elem.get('file')).group(1) if re.search(r'_Q(\d).', cluster_elem.get('file')) else None,
                 'displayName': cluster_elem.get('displayname'),
                 'enabled': cluster_elem.get('enabled'),
                 'type': cluster_elem.get('type'),
