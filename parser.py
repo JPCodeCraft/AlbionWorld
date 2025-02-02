@@ -32,12 +32,12 @@ def type_to_map_category(type_str):
         return 'expedition'
     if 'HIDEOUT' in type_str:
         return 'hideout'
+    if 'PLAYERCITY' in type_str or 'STARTINGCITY' in type_str or 'TUTORIAL' in type_str:
+        return 'city'
     if 'OPENPVP' in type_str or 'SAFEAREA' in type_str or 'STARTAREA' in type_str:
         return 'openworld'
     if 'PASSAGE' in type_str:
         return 'passage'
-    if 'PLAYERCITY' in type_str or 'STARTINGCITY' in type_str:
-        return 'city'
     if 'TUNNEL' in type_str:
         return 'roads'
     else:
