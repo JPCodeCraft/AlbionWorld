@@ -1,3 +1,6 @@
+# extract file using https://github.com/AssetRipper/AssetRipper
+
+
 import re
 import xml.etree.ElementTree as ET
 import json
