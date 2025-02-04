@@ -76,6 +76,15 @@ def parse_clusters(xml_path):
                 'portalExits': [],
                 'portalEntrances': [],
             }
+            # Add idInt property using the specified logic
+            id_val = cluster['id']
+            if id_val:
+                if "BLACKBANK-" in id_val:
+                    id_val = id_val.replace("BLACKBANK-", "")
+            try:
+                cluster['idInt'] = int(id_val)
+            except ValueError:
+                cluster['idInt'] = None
             
             cluster_types.add(cluster['type'])
             
@@ -117,6 +126,16 @@ def parse_clusters(xml_path):
                         'position': tuple(map(float, portal_entrance_elem.get('pos').split())),
                         'kind': portal_entrance_elem.get('kind'),
                     })
+                    
+            # Process marketplaces for isSmugglerNetworkMarket property
+            marketplaces_elem = cluster_elem.find('marketplaces')
+            is_smuggler_network_market = False
+            if marketplaces_elem is not None:
+                for marketplace_elem in marketplaces_elem.findall('marketplace'):
+                    if 'BLACKBANK' in marketplace_elem.get('type', ''):
+                        is_smuggler_network_market = True
+                        break
+            cluster['isSmugglerNetworkMarket'] = is_smuggler_network_market
             
             cluster['neighbours'] = list(cluster['neighbours'])  # Convert set back to list
             clusters.append(cluster)
