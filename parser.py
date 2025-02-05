@@ -130,12 +130,15 @@ def parse_clusters(xml_path):
             # Process marketplaces for isSmugglerNetworkMarket property
             marketplaces_elem = cluster_elem.find('marketplaces')
             is_smuggler_network_market = False
+            is_market = False
             if marketplaces_elem is not None:
+                is_market = True
                 for marketplace_elem in marketplaces_elem.findall('marketplace'):
                     if 'BLACKBANK' in marketplace_elem.get('type', ''):
                         is_smuggler_network_market = True
                         break
             cluster['isSmugglerNetworkMarket'] = is_smuggler_network_market
+            cluster["isMarket"] = is_market
             
             cluster['neighbours'] = list(cluster['neighbours'])  # Convert set back to list
             clusters.append(cluster)
