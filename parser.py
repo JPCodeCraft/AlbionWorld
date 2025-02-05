@@ -61,7 +61,7 @@ def parse_clusters(xml_path):
                 'id': cluster_elem.get('id'),
                 'tier': re.search(r'_T(\d)_', cluster_elem.get('file')).group(1) if re.search(r'_T(\d)_', cluster_elem.get('file')) else None,
                 'quality': re.search(r'_Q(\d).', cluster_elem.get('file')).group(1) if re.search(r'_Q(\d).', cluster_elem.get('file')) else None,
-                'displayName': cluster_elem.get('displayname'),
+                'displayName': 'Black Market' if cluster_elem.get('displayname') == 'Caerleon' else cluster_elem.get('displayname'),
                 'enabled': cluster_elem.get('enabled'),
                 'type': cluster_elem.get('type'),
                 'pvpCategory': type_to_pvp_category(cluster_elem.get('type')),
@@ -85,7 +85,7 @@ def parse_clusters(xml_path):
                         id_val = id_val.replace("BLACKBANK-", "")
                         id_Int = int(id_val)
                         if id_Int:
-                            matching_cluster = root.find(f"./clusters/cluster[@id='{id_Int}']")
+                            matching_cluster = root.find(f"./clusters/cluster[@id='{id_Int:04d}']")
                             if matching_cluster:
                                 cluster['displayName'] = matching_cluster.get('displayname') + ' Smugglers Network'
                     elif "-Auction2" in id_val:
@@ -150,6 +150,9 @@ def parse_clusters(xml_path):
                         break
             cluster['isSmugglersNetworkMarket'] = is_smuggler_network_market
             cluster["isMarket"] = is_market
+            
+            # Add name property
+            cluster['name'] = cluster['displayName'].replace(' ', '')
             
             cluster['neighbours'] = list(cluster['neighbours'])  # Convert set back to list
             clusters.append(cluster)
