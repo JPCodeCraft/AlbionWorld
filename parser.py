@@ -87,7 +87,7 @@ def parse_clusters(xml_path):
                         if id_Int:
                             matching_cluster = root.find(f"./clusters/cluster[@id='{id_Int:04d}']")
                             if matching_cluster:
-                                cluster['displayName'] = matching_cluster.get('displayname') + ' Smugglers Network'
+                                cluster['displayName'] = matching_cluster.get('displayname')
                     elif "-Auction2" in id_val:
                         id_val = id_val.replace("-Auction2", "")
                         id_Int = int(id_val)
@@ -151,6 +151,9 @@ def parse_clusters(xml_path):
             cluster['isSmugglersNetworkMarket'] = is_smuggler_network_market
             cluster["isMarket"] = is_market
             
+            if cluster['isSmugglersNetworkMarket']:
+                cluster['displayName'] += ' Smugglers Network'
+            
             # Add name property
             cluster['name'] = cluster['displayName'].replace(' ', '')
             
@@ -193,6 +196,21 @@ if __name__ == '__main__':
     
     with open(cluster_types_path, 'w') as f:
         json.dump(cluster_types, f, indent=2)
+        
+    json_smuggler_output = 'smugglerMarkets.json'
+    smuggler_markets = []
+    for cluster in clusters_data:
+        if cluster.get('isSmugglersNetworkMarket'):
+            smuggler_markets.append({
+                'intId': cluster.get('idInt'),
+                'displayName': cluster.get('displayName')
+            })
+    with open(json_smuggler_output, 'w') as f:
+        json.dump(smuggler_markets, f, indent=2)
+    
+    print(f"Data has been saved to {output_path}")
+    print(f"Cluster types have been saved to {cluster_types_path}")
+    print(f"Smuggler network market locations have been saved to {json_smuggler_output}")
     
     print(f"Data has been saved to {output_path}")
     print(f"Cluster types have been saved to {cluster_types_path}")
