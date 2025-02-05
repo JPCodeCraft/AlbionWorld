@@ -76,18 +76,27 @@ def parse_clusters(xml_path):
                 'portalExits': [],
                 'portalEntrances': [],
             }
-            # Add idInt property using the specified logic
+            # Add idInt property using the specified logic and update displayName for smugglers network
             id_val = cluster['id']
+            id_Int = None
             if id_val:
-                if "BLACKBANK-" in id_val:
-                    id_val = id_val.replace("BLACKBANK-", "")
-            try:
-                cluster['idInt'] = int(id_val)
-            except ValueError:
-                cluster['idInt'] = None
-            
-            cluster_types.add(cluster['type'])
-            
+                try:
+                    if "BLACKBANK-" in id_val:
+                        id_val = id_val.replace("BLACKBANK-", "")
+                        id_Int = int(id_val)
+                        if id_Int:
+                            matching_cluster = root.find(f"./clusters/cluster[@id='{id_Int}']")
+                            if matching_cluster:
+                                cluster['displayName'] = matching_cluster.get('displayname') + ' Smugglers Network'
+                    elif "-Auction2" in id_val:
+                        id_val = id_val.replace("-Auction2", "")
+                        id_Int = int(id_val)
+                    else:
+                        id_Int = int(id_val)
+                except ValueError:
+                    id_Int = None
+            cluster['idInt'] = id_Int
+
             # Process exits
             exits_elem = cluster_elem.find('exits')
             if exits_elem is not None:
@@ -127,7 +136,7 @@ def parse_clusters(xml_path):
                         'kind': portal_entrance_elem.get('kind'),
                     })
                     
-            # Process marketplaces for isSmugglerNetworkMarket property
+            # Process marketplaces for market property
             marketplaces_elem = cluster_elem.find('marketplaces')
             is_smuggler_network_market = False
             is_market = False
