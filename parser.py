@@ -137,7 +137,7 @@ def parse_clusters(xml_path):
                     if 'BLACKBANK' in marketplace_elem.get('type', ''):
                         is_smuggler_network_market = True
                         break
-            cluster['isSmugglerNetworkMarket'] = is_smuggler_network_market
+            cluster['isSmugglersNetworkMarket'] = is_smuggler_network_market
             cluster["isMarket"] = is_market
             
             cluster['neighbours'] = list(cluster['neighbours'])  # Convert set back to list
