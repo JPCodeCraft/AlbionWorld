@@ -96,6 +96,8 @@ def parse_clusters(xml_path):
                 except ValueError:
                     id_Int = None
             cluster['idInt'] = id_Int
+            
+            cluster_types.add(cluster['type'])
 
             # Process exits
             exits_elem = cluster_elem.find('exits')
